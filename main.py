@@ -16,4 +16,4 @@ async def Koukie(ctx):
 
 
 
-bot.run("OTc0NzMwODIxNDU1OTk0OTAw.GZmQlr.VdMW9hi1LGYPv0pXT8wYdHrkpiflTNcdr-PQoY")
+bot.run(getenv('TOKEN'))
