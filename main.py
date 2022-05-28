@@ -9,8 +9,14 @@ async def  on_ready():
 
 
 @bot.command()
-async def Koukie(ctx):
+async def koukie(ctx):
     await ctx.send('Pas toi je t aime pas')
+    
+@bot.command()
+async def help(ctx):
+    await ctx.send("Test du panel heroku en cours")
+    await ctx.send("Le panel est correctement connecté")
+    
 
 
 
