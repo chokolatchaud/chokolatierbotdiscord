@@ -6,9 +6,7 @@ bot = commands.Bot(command_prefix="?", description="The description")
 @bot.event
 async def  on_ready():
     print("Ready !")
-     channel = bot.get_channel(980192834948833300)
-     await channel.send("Fin de Maintenance")
-    
+    bot.send_msg(980192834948833300, "Je suis en ligne")
 
 
 @bot.command()
