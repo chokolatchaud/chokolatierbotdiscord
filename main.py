@@ -2,6 +2,7 @@ import json
 import random
 import discord
 from discord.ext import commands
+import os
 
 
 
@@ -131,5 +132,5 @@ async def tablettemessage(ctx, texte):
             ctx.send('?useTabletteMessage <texte>')
 
 
-bot.run("OTc0NzMwODIxNDU1OTk0OTAw.GZmQlr.VdMW9hi1LGYPv0pXT8wYdHrkpiflTNcdr-PQoY")
+bot.run(os.environ['TOKEN'])
 
