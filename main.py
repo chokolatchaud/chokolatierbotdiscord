@@ -15,7 +15,7 @@ bot = commands.Bot(command_prefix="?", intents=default_intents, help_command=Non
 async def on_ready():
     print("Ready !")
     channel = bot.get_channel(980192834948833300)  # Gets channel from internal cache
-    await channel.send("je suis en ligne")  # Sends message to channel
+    await channel.send("je suis en ligne Via La DataBase 24h/24h Dev impossible")  # Sends message to channel
 
 
 @bot.event
