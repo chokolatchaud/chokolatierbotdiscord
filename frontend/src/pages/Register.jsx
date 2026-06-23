@@ -33,10 +33,10 @@ export default function Register() {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex w-12 h-12 bg-emerald-500 items-center justify-center rounded-sm mb-4">
+          <div className="inline-flex w-12 h-12 items-center justify-center rounded-sm mb-4" style={{background: "linear-gradient(135deg, #10B981 0%, #F5C518 100%)"}}>
             <Pickaxe className="w-6 h-6 text-black" strokeWidth={3} />
           </div>
-          <p className="font-pixel text-xs text-emerald-400">CRÉATION DE COMPTE</p>
+          <p className="font-pixel text-xs text-gold">CRÉATION DE COMPTE</p>
           <h1 className="font-display font-extrabold text-3xl mt-2">Rejoins le serveur.</h1>
         </div>
 

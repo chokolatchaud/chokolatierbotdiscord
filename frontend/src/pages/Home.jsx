@@ -42,7 +42,7 @@ export default function Home() {
             <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight mt-6 leading-[1.05]">
               Le freebuild
               <br />
-              <span className="text-emerald-400">réinventé</span> par l'économie.
+              <span className="text-gold">réinventé</span> par l'économie.
             </h1>
 
             <p className="mt-6 text-base md:text-lg text-zinc-400 max-w-xl">

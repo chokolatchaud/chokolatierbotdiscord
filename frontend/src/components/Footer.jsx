@@ -3,7 +3,7 @@ export default function Footer() {
     <footer className="border-t border-border mt-24">
       <div className="mx-auto max-w-7xl px-6 py-10 flex flex-col md:flex-row justify-between gap-4">
         <div>
-          <p className="font-pixel text-xs text-emerald-400">FARM & BUILD</p>
+          <p className="font-pixel text-xs text-gold">FARM & BUILD</p>
           <p className="text-sm text-zinc-400 mt-1">
             Serveur Minecraft freebuild économique — mine.farm-and.fr
           </p>

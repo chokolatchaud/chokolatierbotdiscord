@@ -30,8 +30,11 @@ export default function Leaderboard() {
           {[rows[1], rows[0], rows[2]].map((p, i) => {
             const rank = i === 1 ? 1 : i === 0 ? 2 : 3;
             const height = rank === 1 ? "h-44" : rank === 2 ? "h-36" : "h-32";
-            const color = rank === 1 ? "text-yellow-400" : rank === 2 ? "text-zinc-300" : "text-amber-700";
+            const color = rank === 1 ? "text-gold" : rank === 2 ? "text-zinc-300" : "text-amber-700";
             const Icon = rank === 1 ? Crown : rank === 2 ? Trophy : Medal;
+            const gradient = rank === 1
+              ? "from-yellow-500/15 via-emerald-500/5 to-transparent"
+              : "from-emerald-500/10 to-transparent";
             return (
               <div key={p.username} className="flex flex-col items-center">
                 <Icon className={`w-8 h-8 ${color} mb-2`} />
@@ -41,7 +44,7 @@ export default function Leaderboard() {
                 <p className="font-mono-stat font-bold text-emerald-400 text-xs md:text-sm">
                   {p.balance.toLocaleString("fr-FR")} $FB
                 </p>
-                <div className={`mt-3 w-full ${height} border border-border bg-gradient-to-t from-emerald-500/10 to-transparent rounded-sm flex items-start justify-center pt-3`}>
+                <div className={`mt-3 w-full ${height} border ${rank === 1 ? "border-gold-soft" : "border-border"} bg-gradient-to-t ${gradient} rounded-sm flex items-start justify-center pt-3`}>
                   <span className={`font-pixel ${color} text-2xl`}>#{rank}</span>
                 </div>
               </div>

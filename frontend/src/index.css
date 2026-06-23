@@ -54,6 +54,18 @@
 .font-mono-stat { font-family: 'JetBrains Mono', monospace; }
 .font-pixel { font-family: 'Silkscreen', monospace; letter-spacing: 0.05em; }
 
+/* Brand palette: green primary + gold secondary */
+:root {
+    --gold: #F5C518;
+    --gold-soft: #EAB308;
+    --gold-dark: #B7861A;
+}
+.text-gold { color: var(--gold); }
+.bg-gold { background-color: var(--gold); }
+.border-gold { border-color: var(--gold); }
+.bg-gold-soft { background-color: rgba(245, 197, 24, 0.10); }
+.border-gold-soft { border-color: rgba(245, 197, 24, 0.30); }
+
 /* Grain texture overlay */
 .grain::before {
     content: '';

@@ -18,12 +18,12 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 border-b border-border bg-[#0A0A0B]/85 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2" data-testid="brand-logo">
-          <div className="w-8 h-8 bg-emerald-500 flex items-center justify-center rounded-sm">
+          <div className="w-8 h-8 flex items-center justify-center rounded-sm" style={{background: "linear-gradient(135deg, #10B981 0%, #F5C518 100%)"}}>
             <Pickaxe className="w-4 h-4 text-black" strokeWidth={3} />
           </div>
           <div className="flex flex-col leading-none">
             <span className="font-display font-extrabold text-lg tracking-tight">Farm & Build</span>
-            <span className="font-pixel text-[10px] text-emerald-400">FREEBUILD ÉCONOMIQUE</span>
+            <span className="font-pixel text-[10px] text-gold">FREEBUILD ÉCONOMIQUE</span>
           </div>
         </Link>
 
@@ -97,7 +97,7 @@ export default function Navbar() {
                 size="sm"
                 onClick={() => navigate("/register")}
                 data-testid="register-nav-btn"
-                className="bg-emerald-500 hover:bg-emerald-600 text-black font-semibold"
+                className="bg-gold hover:bg-yellow-500 text-black font-semibold"
               >
                 S'inscrire
               </Button>
