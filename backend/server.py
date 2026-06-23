@@ -427,74 +427,13 @@ async def admin_delete_site(name: str, _: dict = Depends(get_admin_user)):
 
 # ---------------- Seed ----------------
 async def seed_demo_data():
+    """Indexes only — no fake data. Real data is pushed by the Minecraft plugin
+    (market & leaderboard & inventory) or created by the admin (vote sites)."""
     await db.users.create_index("username_lower", unique=True)
     await db.structures.create_index("name", unique=True)
     await db.leaderboard.create_index("username", unique=True)
-
-    if await db.structures.count_documents({}) == 0:
-        import random
-        names = [
-            ("Château de pierre", "castle", "Médiéval"),
-            ("Ferme automatique", "wheat", "Agriculture"),
-            ("Tour de guet", "tower", "Défense"),
-            ("Maison moderne", "house", "Résidentiel"),
-            ("Mine de diamants", "pickaxe", "Industriel"),
-            ("Pont suspendu", "bridge", "Infrastructure"),
-            ("Phare côtier", "lighthouse", "Maritime"),
-            ("Statue colossale", "statue", "Art"),
-        ]
-        now = datetime.now(timezone.utc)
-        for name, icon, cat in names:
-            base = random.uniform(500, 5000)
-            history = []
-            price = base
-            for i in range(40, 0, -1):
-                price *= random.uniform(0.95, 1.06)
-                t = (now - timedelta(hours=i)).isoformat()
-                history.append({"t": t, "price": round(price, 2)})
-            prev = history[-2]["price"] if len(history) > 1 else price
-            change = (price - prev) / prev * 100 if prev else 0
-            await db.structures.insert_one({
-                "name": name, "price": round(price, 2),
-                "previous_price": round(prev, 2),
-                "change_pct": round(change, 2),
-                "icon": icon, "category": cat,
-                "history": history,
-                "updated_at": now.isoformat(),
-            })
-
-    if await db.leaderboard.count_documents({}) == 0:
-        demo = [
-            ("Steve_Builder", 125430.50, 24),
-            ("Alex_Mining", 98220.10, 18),
-            ("Notch_Reborn", 76450.00, 15),
-            ("Herobrine_FR", 65120.75, 12),
-            ("PixelKing", 54300.00, 10),
-            ("BlockMaster", 43210.80, 9),
-            ("RedstoneGuru", 38900.25, 7),
-            ("CreeperFarmer", 29870.00, 6),
-            ("EnderQueen", 21540.45, 5),
-            ("ZombieSlayer", 15200.00, 4),
-        ]
-        for u, b, s in demo:
-            await db.leaderboard.insert_one({
-                "username": u, "balance": b, "structures": s,
-                "updated_at": datetime.now(timezone.utc).isoformat(),
-            })
-
-    if await db.vote_sites.count_documents({}) == 0:
-        sites = [
-            {"name": "Minecraft-Server.net", "url": "https://minecraft-server.net/vote/votre-serveur",
-             "reward": "100 coins + 1 diamant", "order": 1, "configured": False},
-            {"name": "Serveur-Minecraft.com", "url": "https://serveur-minecraft.com/vote/votre-serveur",
-             "reward": "150 coins", "order": 2, "configured": False},
-            {"name": "Top-Serveurs.net", "url": "https://top-serveurs.net/minecraft/vote/votre-serveur",
-             "reward": "200 coins + clé légendaire", "order": 3, "configured": False},
-            {"name": "Minecraft-MP.com", "url": "https://minecraft-mp.com/server/vote/",
-             "reward": "100 coins", "order": 4, "configured": False},
-        ]
-        for s in sites:
-            await db.vote_sites.insert_one(s)
+    await db.player_inventory.create_index("username", unique=True)
+    await db.vote_sites.create_index("name", unique=True)
 
 
 @app.on_event("startup")

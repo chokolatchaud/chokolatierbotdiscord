@@ -66,8 +66,9 @@ export default function Leaderboard() {
             <div key={i} className="h-14 border-b border-border animate-pulse bg-[#15181F]/30" />
           ))
         ) : rows.length === 0 ? (
-          <p className="p-8 text-center text-zinc-500 font-mono-stat text-sm">
-            Aucune donnée. Le plugin n'a pas encore publié de classement.
+          <p className="p-8 text-center text-zinc-500 font-mono-stat text-sm" data-testid="leaderboard-empty">
+            Le classement est vide. Il se remplira dès que ton plugin enverra les premiers soldes
+            via <code className="text-emerald-400">POST /api/leaderboard</code>.
           </p>
         ) : (
           rows.map((r, i) => (

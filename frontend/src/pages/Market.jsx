@@ -60,7 +60,16 @@ export default function Market() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <p className="text-zinc-400 font-mono-stat py-12 text-center">Aucune structure trouvée.</p>
+        <div className="border border-dashed border-border rounded-sm p-12 text-center" data-testid="market-empty">
+          <p className="font-pixel text-xs text-zinc-500">MARCHÉ VIDE</p>
+          <p className="text-zinc-400 mt-3">
+            Aucune structure cotée pour le moment.
+          </p>
+          <p className="text-xs text-zinc-500 mt-2 font-mono-stat">
+            Le marché se peuplera dès que ton plugin pousse les premiers prix sur{" "}
+            <code className="text-emerald-400">POST /api/market/structures</code>.
+          </p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-testid="market-grid">
           {filtered.map((s) => (

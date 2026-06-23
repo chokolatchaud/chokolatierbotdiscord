@@ -44,6 +44,16 @@ export default function Vote() {
             <div key={i} className="h-24 border border-border bg-[#121418] animate-pulse rounded-sm" />
           ))}
         </div>
+      ) : sites.length === 0 ? (
+        <div className="border border-dashed border-border rounded-sm p-12 text-center" data-testid="vote-empty">
+          <p className="font-pixel text-xs text-zinc-500">AUCUN SITE</p>
+          <p className="text-zinc-400 mt-3">
+            Les sites de vote ne sont pas encore configurés.
+          </p>
+          <p className="text-xs text-zinc-500 mt-2 font-mono-stat">
+            Connecte-toi en admin → <code className="text-emerald-400">/admin/votes</code> pour les ajouter.
+          </p>
+        </div>
       ) : (
         <div className="space-y-3" data-testid="vote-sites-list">
           {sites.map((site, idx) => (
