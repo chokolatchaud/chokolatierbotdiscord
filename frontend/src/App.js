@@ -9,6 +9,9 @@ import Leaderboard from "@/pages/Leaderboard";
 import Vote from "@/pages/Vote";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import Dashboard from "@/pages/Dashboard";
+import AdminVotes from "@/pages/AdminVotes";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Toaster } from "@/components/ui/sonner";
 
 function App() {
@@ -25,6 +28,22 @@ function App() {
               <Route path="/vote" element={<Vote />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/votes"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminVotes />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </main>
           <Footer />

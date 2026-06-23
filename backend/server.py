@@ -31,6 +31,7 @@ JWT_ALGORITHM = "HS256"
 JWT_SECRET = os.environ['JWT_SECRET']
 PLUGIN_API_KEY = os.environ['PLUGIN_API_KEY']
 SERVER_IP = os.environ.get('SERVER_IP', 'mine.farm-and.fr')
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'Admin')
 
 
 # ---------------- Helpers ----------------
@@ -69,6 +70,12 @@ async def get_current_user(request: Request) -> dict:
     user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0, "password_hash": 0})
     if not user:
         raise HTTPException(status_code=401, detail="Utilisateur introuvable")
+    return user
+
+
+async def get_admin_user(user: dict = Depends(get_current_user)) -> dict:
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès administrateur requis")
     return user
 
 
@@ -118,18 +125,21 @@ async def register(data: RegisterIn, response: Response):
         raise HTTPException(status_code=400, detail="Ce pseudo est déjà utilisé")
 
     user_id = str(uuid.uuid4())
+    role = "admin" if username.lower() == ADMIN_USERNAME.lower() else "player"
     doc = {
         "id": user_id,
         "username": username,
         "username_lower": username.lower(),
         "password_hash": hash_password(data.password),
+        "role": role,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.users.insert_one(doc)
     token = create_access_token(user_id, username)
     response.set_cookie("access_token", token, httponly=True, secure=False,
                         samesite="lax", max_age=7 * 24 * 3600, path="/")
-    return {"id": user_id, "username": username, "created_at": doc["created_at"], "token": token}
+    return {"id": user_id, "username": username, "role": role,
+            "created_at": doc["created_at"], "token": token}
 
 
 @api_router.post("/auth/login")
@@ -141,6 +151,7 @@ async def login(data: LoginIn, response: Response):
     response.set_cookie("access_token", token, httponly=True, secure=False,
                         samesite="lax", max_age=7 * 24 * 3600, path="/")
     return {"id": user["id"], "username": user["username"],
+            "role": user.get("role", "player"),
             "created_at": user["created_at"], "token": token}
 
 
@@ -249,6 +260,97 @@ async def vote_sites():
     return sites
 
 
+# ---------------- Player Dashboard ----------------
+@api_router.get("/player/me")
+async def player_me(user: dict = Depends(get_current_user)):
+    """Returns the player's market data: balance, owned structures, rank."""
+    entry = await db.leaderboard.find_one(
+        {"username": user["username"]}, {"_id": 0}
+    )
+    inv = await db.player_inventory.find_one(
+        {"username": user["username"]}, {"_id": 0}
+    )
+    # compute rank from leaderboard
+    rank = None
+    if entry:
+        higher = await db.leaderboard.count_documents(
+            {"balance": {"$gt": entry["balance"]}}
+        )
+        rank = higher + 1
+    return {
+        "username": user["username"],
+        "role": user.get("role", "player"),
+        "balance": entry["balance"] if entry else 0,
+        "structures_count": entry["structures"] if entry else 0,
+        "rank": rank,
+        "owned_structures": inv["structures"] if inv else [],
+        "linked": entry is not None,
+    }
+
+
+class InventoryIn(BaseModel):
+    username: str
+    structures: List[dict]  # [{"name": "...", "qty": 1, "value": 1234.5}]
+
+
+@api_router.post("/player/inventory", dependencies=[Depends(require_plugin_key)])
+async def upsert_inventory(data: InventoryIn):
+    doc = {
+        "username": data.username,
+        "structures": data.structures,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.player_inventory.update_one(
+        {"username": data.username}, {"$set": doc}, upsert=True
+    )
+    return {"ok": True}
+
+
+# ---------------- Admin: Vote Sites Management ----------------
+class VoteSiteIn(BaseModel):
+    name: str
+    url: str
+    reward: str
+    order: int = 999
+    configured: bool = True
+
+
+@api_router.get("/admin/vote-sites")
+async def admin_list_sites(_: dict = Depends(get_admin_user)):
+    sites = await db.vote_sites.find({}, {"_id": 0}).to_list(100)
+    sites.sort(key=lambda x: x.get("order", 999))
+    return sites
+
+
+@api_router.post("/admin/vote-sites")
+async def admin_create_site(data: VoteSiteIn, _: dict = Depends(get_admin_user)):
+    existing = await db.vote_sites.find_one({"name": data.name})
+    if existing:
+        raise HTTPException(status_code=400, detail="Un site avec ce nom existe déjà")
+    doc = data.model_dump()
+    await db.vote_sites.insert_one(doc)
+    return doc
+
+
+@api_router.put("/admin/vote-sites/{name}")
+async def admin_update_site(name: str, data: VoteSiteIn,
+                            _: dict = Depends(get_admin_user)):
+    res = await db.vote_sites.update_one(
+        {"name": name}, {"$set": data.model_dump()}
+    )
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Site introuvable")
+    return data.model_dump()
+
+
+@api_router.delete("/admin/vote-sites/{name}")
+async def admin_delete_site(name: str, _: dict = Depends(get_admin_user)):
+    res = await db.vote_sites.delete_one({"name": name})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Site introuvable")
+    return {"ok": True}
+
+
 # ---------------- Seed ----------------
 async def seed_demo_data():
     await db.users.create_index("username_lower", unique=True)
@@ -324,6 +426,11 @@ async def seed_demo_data():
 @app.on_event("startup")
 async def startup_event():
     await seed_demo_data()
+    # promote configured ADMIN_USERNAME if user exists
+    await db.users.update_one(
+        {"username_lower": ADMIN_USERNAME.lower()},
+        {"$set": {"role": "admin"}},
+    )
 
 
 @app.on_event("shutdown")

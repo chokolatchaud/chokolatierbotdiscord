@@ -50,6 +50,22 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           {user && user !== false ? (
             <>
+              <Link
+                to="/dashboard"
+                data-testid="nav-dashboard"
+                className="hidden sm:inline-flex px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-emerald-400 transition-colors"
+              >
+                Dashboard
+              </Link>
+              {user.role === "admin" && (
+                <Link
+                  to="/admin/votes"
+                  data-testid="nav-admin"
+                  className="hidden sm:inline-flex px-3 py-1.5 text-xs font-pixel text-amber-400 border border-amber-500/30 bg-amber-500/10 rounded-sm hover:bg-amber-500/20"
+                >
+                  ADMIN
+                </Link>
+              )}
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 border border-border rounded-sm">
                 <User className="w-3.5 h-3.5 text-emerald-400" />
                 <span className="font-mono-stat text-xs" data-testid="navbar-username">

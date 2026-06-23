@@ -1,0 +1,38 @@
+{
+  "summary": "P1 features tested (player dashboard + admin votes). 17/18 checks pass. One HIGH-priority backend bug: POST /api/admin/vote-sites returns 500 due to MongoDB _id ObjectId being included in response serialization (insert_one mutates the dict). Site is actually created in DB and visible on /vote/sites, but the API response fails so the admin UI shows 'Request failed with status code 500' — admins cannot tell their action succeeded without refresh.",
+  "tested_scope": ["backend", "frontend", "auth", "integration"],
+  "passed": [
+    "GET /api/player/me unauth -> 401",
+    "GET /api/player/me authed returns {username,role,balance,structures_count,rank,owned_structures,linked}",
+    "POST /api/player/inventory without X-API-Key -> 403; with key -> upserts; /player/me then reflects owned_structures",
+    "After plugin POST /api/leaderboard, /api/player/me shows balance and rank (rank=11 for new user balance 5000)",
+    "GET /api/admin/vote-sites as non-admin -> 403; as admin -> list of sites",
+    "POST /api/admin/vote-sites duplicate name -> 400 (and site IS created in DB despite 500 on first POST)",
+    "PUT /api/admin/vote-sites/{name} updates fields (200); non-existent -> 404",
+    "DELETE /api/admin/vote-sites/{name} -> 200; non-existent -> 404",
+    "Public GET /api/vote/sites reflects admin changes (create/update/delete confirmed)",
+    "GET /api/auth/me returns role field",
+    "Register 'Admin' (case-insensitive lookup) yields role='admin'; other users role='player' (verified via existing Admin login + new TestP user)",
+    "Frontend: logged-in player sees 'Dashboard' link in navbar (nav-dashboard testid present)",
+    "Frontend: admin sees 'ADMIN' badge link (nav-admin testid present); player does NOT see nav-admin",
+    "Frontend: /dashboard redirects unauthenticated users to /login",
+    "Frontend: /dashboard shows dash-balance/dash-rank/dash-structures cards; shows 'Pas encore de données' banner when no leaderboard entry",
+    "Frontend: /admin/votes redirects non-admin player to /",
+    "Frontend: /admin/votes as admin shows admin-sites-list with admin-new-site-btn and edit/delete buttons per site"
+  ],
+  "failed": [
+    {
+      "area": "Backend - POST /api/admin/vote-sites",
+      "issue": "Endpoint returns HTTP 500 'Internal Server Error' on successful create. Root cause: motor's insert_one mutates the passed dict to add `_id` (ObjectId), and the endpoint returns that same `doc`, which FastAPI cannot serialize. ValueError: 'ObjectId object is not iterable'. The site IS created in DB (visible in /vote/sites and triggers 400 duplicate on retry).",
+      "evidence": "curl POST returns 500; backend logs: ValueError: [TypeError(\"'ObjectId' object is not iterable\"), TypeError('vars() argument must have __dict__ attribute')]. Frontend Admin UI shows red banner 'Request failed with status code 500' after clicking Créer, and the new site is NOT visible in the list until page reload (UI assumes failure).",
+      "priority": "HIGH"
+    }
+  ],
+  "action_items": [
+    "Fix POST /api/admin/vote-sites in /app/backend/server.py (admin_create_site): either pop '_id' before returning, or return data.model_dump() instead of the mutated `doc`. Suggested fix: replace `await db.vote_sites.insert_one(doc); return doc` with `await db.vote_sites.insert_one(doc); doc.pop('_id', None); return doc` (or return data.model_dump())."
+  ],
+  "success_rate": {"backend": "92%", "frontend": "100%"},
+  "retest_needed": true,
+  "full_testing_deferred": true,
+  "test_credentials_note": "/app/memory/test_credentials.md does not exist. Used credentials from review request (Admin/admin123 for admin — already registered, logged in successfully; created fresh TestP* and PlayUI* users via API/UI for player tests)."
+}
