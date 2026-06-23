@@ -12,6 +12,8 @@ import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import AdminVotes from "@/pages/AdminVotes";
 import AdminSettings from "@/pages/AdminSettings";
+import AdminHome from "@/pages/AdminHome";
+import AdminUsers from "@/pages/AdminUsers";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SettingsProvider } from "@/context/SettingsContext";
 import MaintenanceBanner from "@/components/MaintenanceBanner";
@@ -42,10 +44,26 @@ function App() {
                   }
                 />
                 <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute staffOnly>
+                      <AdminHome />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/admin/votes"
                   element={
-                    <ProtectedRoute adminOnly>
+                    <ProtectedRoute staffOnly>
                       <AdminVotes />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <AdminUsers />
                     </ProtectedRoute>
                   }
                 />

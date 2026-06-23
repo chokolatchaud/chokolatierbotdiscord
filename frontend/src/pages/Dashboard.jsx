@@ -132,15 +132,15 @@ export default function Dashboard() {
         )}
       </div>
 
-      {user.role === "admin" && (
+      {(user.role === "admin" || user.role === "moderator") && (
         <div className="mt-10 border border-emerald-500/30 bg-emerald-500/5 p-5 rounded-sm flex items-center justify-between">
           <div>
-            <p className="font-pixel text-xs text-emerald-400">ADMINISTRATEUR</p>
-            <p className="font-display font-semibold mt-1">Tu peux configurer les sites de vote.</p>
+            <p className="font-pixel text-xs text-emerald-400">{user.role === "admin" ? "ADMINISTRATEUR" : "MODÉRATEUR"}</p>
+            <p className="font-display font-semibold mt-1">Accès au panel de gestion.</p>
           </div>
-          <Link to="/admin/votes" data-testid="dash-admin-link">
+          <Link to="/admin" data-testid="dash-admin-link">
             <Button className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-sm">
-              Interface admin <ArrowRight className="w-4 h-4 ml-2" />
+              Ouvrir le panel <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </Link>
         </div>

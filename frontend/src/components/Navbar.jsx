@@ -57,13 +57,13 @@ export default function Navbar() {
               >
                 Dashboard
               </Link>
-              {user.role === "admin" && (
+              {(user.role === "admin" || user.role === "moderator") && (
                 <Link
-                  to="/admin/votes"
+                  to="/admin"
                   data-testid="nav-admin"
                   className="hidden sm:inline-flex px-3 py-1.5 text-xs font-pixel text-amber-400 border border-amber-500/30 bg-amber-500/10 rounded-sm hover:bg-amber-500/20"
                 >
-                  ADMIN
+                  {user.role === "admin" ? "ADMIN" : "STAFF"}
                 </Link>
               )}
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 border border-border rounded-sm">

@@ -80,6 +80,16 @@ async def get_admin_user(user: dict = Depends(get_current_user)) -> dict:
     return user
 
 
+async def get_staff_user(user: dict = Depends(get_current_user)) -> dict:
+    """Admin OR moderator. Used for vote sites management."""
+    if user.get("role") not in ("admin", "moderator"):
+        raise HTTPException(status_code=403, detail="Accès staff requis")
+    return user
+
+
+ALLOWED_ROLES = {"player", "moderator", "admin"}
+
+
 def require_plugin_key(x_api_key: Optional[str] = Header(None)):
     if x_api_key != PLUGIN_API_KEY:
         raise HTTPException(status_code=403, detail="Clé API plugin invalide")
@@ -389,14 +399,14 @@ class VoteSiteIn(BaseModel):
 
 
 @api_router.get("/admin/vote-sites")
-async def admin_list_sites(_: dict = Depends(get_admin_user)):
+async def admin_list_sites(_: dict = Depends(get_staff_user)):
     sites = await db.vote_sites.find({}, {"_id": 0}).to_list(100)
     sites.sort(key=lambda x: x.get("order", 999))
     return sites
 
 
 @api_router.post("/admin/vote-sites")
-async def admin_create_site(data: VoteSiteIn, _: dict = Depends(get_admin_user)):
+async def admin_create_site(data: VoteSiteIn, _: dict = Depends(get_staff_user)):
     existing = await db.vote_sites.find_one({"name": data.name})
     if existing:
         raise HTTPException(status_code=400, detail="Un site avec ce nom existe déjà")
@@ -408,7 +418,7 @@ async def admin_create_site(data: VoteSiteIn, _: dict = Depends(get_admin_user))
 
 @api_router.put("/admin/vote-sites/{name}")
 async def admin_update_site(name: str, data: VoteSiteIn,
-                            _: dict = Depends(get_admin_user)):
+                            _: dict = Depends(get_staff_user)):
     res = await db.vote_sites.update_one(
         {"name": name}, {"$set": data.model_dump()}
     )
@@ -418,11 +428,93 @@ async def admin_update_site(name: str, data: VoteSiteIn,
 
 
 @api_router.delete("/admin/vote-sites/{name}")
-async def admin_delete_site(name: str, _: dict = Depends(get_admin_user)):
+async def admin_delete_site(name: str, _: dict = Depends(get_staff_user)):
     res = await db.vote_sites.delete_one({"name": name})
     if res.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Site introuvable")
     return {"ok": True}
+
+
+# ---------------- Admin: User Management ----------------
+class CreateUserIn(BaseModel):
+    username: str = Field(min_length=3, max_length=16)
+    password: str = Field(min_length=6, max_length=128)
+    role: str = "player"
+
+
+class UpdateRoleIn(BaseModel):
+    role: str
+
+
+@api_router.get("/admin/users")
+async def admin_list_users(_: dict = Depends(get_admin_user)):
+    users = await db.users.find(
+        {}, {"_id": 0, "password_hash": 0, "username_lower": 0}
+    ).to_list(500)
+    users.sort(key=lambda x: x.get("created_at", ""))
+    return users
+
+
+@api_router.post("/admin/users")
+async def admin_create_user(data: CreateUserIn, _: dict = Depends(get_admin_user)):
+    if data.role not in ALLOWED_ROLES:
+        raise HTTPException(status_code=400, detail="Rôle invalide")
+    if await db.users.find_one({"username_lower": data.username.lower()}):
+        raise HTTPException(status_code=400, detail="Ce pseudo est déjà utilisé")
+    uid = str(uuid.uuid4())
+    doc = {
+        "id": uid,
+        "username": data.username,
+        "username_lower": data.username.lower(),
+        "password_hash": hash_password(data.password),
+        "role": data.role,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.users.insert_one(doc)
+    return {"id": uid, "username": data.username, "role": data.role,
+            "created_at": doc["created_at"]}
+
+
+@api_router.put("/admin/users/{user_id}/role")
+async def admin_update_role(user_id: str, data: UpdateRoleIn,
+                            admin: dict = Depends(get_admin_user)):
+    if data.role not in ALLOWED_ROLES:
+        raise HTTPException(status_code=400, detail="Rôle invalide")
+    if user_id == admin["id"] and data.role != "admin":
+        raise HTTPException(status_code=400, detail="Tu ne peux pas te rétrograder toi-même")
+    res = await db.users.update_one({"id": user_id}, {"$set": {"role": data.role}})
+    if res.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+    return {"ok": True, "role": data.role}
+
+
+@api_router.delete("/admin/users/{user_id}")
+async def admin_delete_user(user_id: str, admin: dict = Depends(get_admin_user)):
+    if user_id == admin["id"]:
+        raise HTTPException(status_code=400, detail="Tu ne peux pas te supprimer toi-même")
+    res = await db.users.delete_one({"id": user_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+    return {"ok": True}
+
+
+# ---------------- Admin: Stats ----------------
+@api_router.get("/admin/stats")
+async def admin_stats(_: dict = Depends(get_staff_user)):
+    settings = await get_settings_doc()
+    state = await db.server_state.find_one({"id": "main"}, {"_id": 0}) or {}
+    return {
+        "users_count": await db.users.count_documents({}),
+        "admins_count": await db.users.count_documents({"role": "admin"}),
+        "moderators_count": await db.users.count_documents({"role": "moderator"}),
+        "structures_count": await db.structures.count_documents({}),
+        "leaderboard_count": await db.leaderboard.count_documents({}),
+        "vote_sites_count": await db.vote_sites.count_documents({}),
+        "online_players": state.get("online_players", 0),
+        "max_players": state.get("max_players", 100),
+        "maintenance": settings.get("maintenance", False),
+        "ip": settings.get("ip"),
+    }
 
 
 # ---------------- Seed ----------------
