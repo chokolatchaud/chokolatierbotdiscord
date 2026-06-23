@@ -1,0 +1,280 @@
+From 01a6e3021d108721463d96ba6da6228fbebd00cc Mon Sep 17 00:00:00 2001
+From: Farm-and Web Integration <webapi@farmand.fr>
+Date: Tue, 23 Jun 2026 12:03:07 +0000
+Subject: [PATCH] feat(api): ajout WebApiClient pour pousser les donnees vers
+ le site Farm & Build
+
+- Nouveau package fr.kevyn.farmland.api avec WebApiClient.java
+- 4 methodes async : pushServerStatus, pushStructurePrice, pushPlayerBalance, pushPlayerInventory
+- Pattern OkHttp enqueue (fire-and-forget, non-bloquant)
+- Aucune modification du code existant
+- README_WEBAPI.md documente les snippets a inserer dans Main, listeners, MarketManager, PlayerServer et config.yml
+---
+ .../fr/kevyn/farmland/api/README_WEBAPI.md    | 129 ++++++++++++++++++
+ .../fr/kevyn/farmland/api/WebApiClient.java   | 118 ++++++++++++++++
+ 2 files changed, 247 insertions(+)
+ create mode 100644 src/main/java/fr/kevyn/farmland/api/README_WEBAPI.md
+ create mode 100644 src/main/java/fr/kevyn/farmland/api/WebApiClient.java
+
+diff --git a/src/main/java/fr/kevyn/farmland/api/README_WEBAPI.md b/src/main/java/fr/kevyn/farmland/api/README_WEBAPI.md
+new file mode 100644
+index 0000000..2f473cc
+--- /dev/null
++++ b/src/main/java/fr/kevyn/farmland/api/README_WEBAPI.md
+@@ -0,0 +1,129 @@
++# Integration WebAPI - Farm & Build
++
++Ce dossier contient le client HTTP pour pousser les donnees du plugin vers le site
++https://farm-and-build.preview.emergentagent.com
++
++## Fichier ajoute (aucune modification du code existant)
++
++- `src/main/java/fr/kevyn/farmland/api/WebApiClient.java`
++
++## Modifications a faire MANUELLEMENT dans ton code existant
++
++Tous les `// AJOUT WEBAPI:` ci-dessous sont des NOUVELLES lignes a inserer.
++Aucune ligne existante n'a besoin d'etre modifiee ou supprimee.
++
++---
++
++### 1. Dans ton plugin principal (ex: `fr.kevyn.farmland.Main` - la classe avec onEnable)
++
++```java
++// AJOUT WEBAPI: import en haut du fichier
++import fr.kevyn.farmland.api.WebApiClient;
++
++public class Main extends JavaPlugin {
++
++    // AJOUT WEBAPI: champ
++    private WebApiClient webApi;
++
++    @Override
++    public void onEnable() {
++        // ... ton code existant inchange ...
++
++        // AJOUT WEBAPI: bloc complet a coller a la fin de onEnable()
++        saveDefaultConfig();
++        if (getConfig().getBoolean("webapi.enabled", false)) {
++            String base = getConfig().getString("webapi.base_url");
++            String key  = getConfig().getString("webapi.api_key");
++            this.webApi = new WebApiClient(this, base, key);
++
++            long ticks = getConfig().getLong("webapi.push_interval_seconds", 30L) * 20L;
++            getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
++                webApi.pushServerStatus(
++                    getServer().getOnlinePlayers().size(),
++                    getServer().getMaxPlayers(),
++                    getServer().getBukkitVersion()
++                );
++            }, 20L, ticks);
++        }
++        // FIN AJOUT WEBAPI
++    }
++
++    // AJOUT WEBAPI: getter
++    public WebApiClient getWebApi() { return webApi; }
++}
++```
++
++### 2. Dans ton listener de join/quit (laisse intact, ajoute juste l'appel)
++
++```java
++@EventHandler
++public void onJoin(PlayerJoinEvent e) {
++    // ... ton code existant ...
++
++    // AJOUT WEBAPI:
++    if (plugin.getWebApi() != null) {
++        plugin.getWebApi().pushServerStatus(
++            plugin.getServer().getOnlinePlayers().size(),
++            plugin.getServer().getMaxPlayers(),
++            plugin.getServer().getBukkitVersion()
++        );
++    }
++}
++```
++
++### 3. Dans ton MarketManager (apres recalcul de prix)
++
++```java
++// AJOUT WEBAPI: a chaque structure dont le prix change
++if (plugin.getWebApi() != null) {
++    plugin.getWebApi().pushStructurePrice(
++        structure.getName(), structure.getPrice(), structure.getCategory()
++    );
++}
++```
++
++### 4. Dans ton PlayerServer (apres modif de solde / inventaire)
++
++```java
++// AJOUT WEBAPI: extraire les valeurs en local AVANT l'appel async (thread-safety)
++final String name = player.getUsername();
++final double bal  = player.getBalance();
++final int    cnt  = player.getOwnedStructures().size();
++if (plugin.getWebApi() != null) {
++    plugin.getWebApi().pushPlayerBalance(name, bal, cnt);
++
++    List<WebApiClient.OwnedStructure> items = player.getOwnedStructures().stream()
++        .map(s -> new WebApiClient.OwnedStructure(s.getName(), s.getQty(), s.getValue()))
++        .toList();
++    plugin.getWebApi().pushPlayerInventory(name, items);
++}
++```
++
++### 5. Dans `src/main/resources/config.yml`
++
++Ajoute ce bloc a la fin (sans toucher au reste) :
++
++```yaml
++webapi:
++  enabled: true
++  base_url: "https://farm-and-build.preview.emergentagent.com"
++  api_key: "REMPLACER_PAR_PLUGIN_API_KEY"
++  push_interval_seconds: 30
++```
++
++---
++
++## Dependances Maven (pom.xml)
++
++OkHttp et Gson sont probablement deja dispo via ton DiscordWebhook.
++Sinon, ajoute :
++
++```xml
++<dependency>
++    <groupId>com.squareup.okhttp3</groupId>
++    <artifactId>okhttp</artifactId>
++    <version>4.12.0</version>
++</dependency>
++```
++
++(Gson est shade par defaut dans Spigot/Paper.)
+diff --git a/src/main/java/fr/kevyn/farmland/api/WebApiClient.java b/src/main/java/fr/kevyn/farmland/api/WebApiClient.java
+new file mode 100644
+index 0000000..37d842a
+--- /dev/null
++++ b/src/main/java/fr/kevyn/farmland/api/WebApiClient.java
+@@ -0,0 +1,118 @@
++package fr.kevyn.farmland.api;
++
++import com.google.gson.Gson;
++import okhttp3.*;
++import org.bukkit.plugin.Plugin;
++
++import java.io.IOException;
++import java.util.List;
++import java.util.Map;
++import java.util.concurrent.TimeUnit;
++import java.util.logging.Level;
++
++/**
++ * Client HTTP pour pousser les donnees Farmland vers le site web.
++ * Tous les appels sont asynchrones (OkHttp.enqueue) - jamais de blocage du main thread.
++ *
++ * Pattern volontairement calque sur DiscordWebhook : OkHttpClient partage,
++ * appels fire-and-forget, logs en cas d'echec.
++ */
++public class WebApiClient {
++
++    private static final String EP_SERVER    = "/api/server/status";
++    private static final String EP_MARKET    = "/api/market/structures";
++    private static final String EP_LEADER    = "/api/leaderboard";
++    private static final String EP_INVENTORY = "/api/player/inventory";
++
++    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
++
++    private final Plugin plugin;
++    private final String baseUrl;
++    private final String apiKey;
++    private final OkHttpClient http;
++    private final Gson gson = new Gson();
++
++    public WebApiClient(Plugin plugin, String baseUrl, String apiKey) {
++        this.plugin  = plugin;
++        this.baseUrl = stripTrailingSlash(baseUrl);
++        this.apiKey  = apiKey;
++        this.http = new OkHttpClient.Builder()
++                .connectTimeout(5, TimeUnit.SECONDS)
++                .callTimeout(10, TimeUnit.SECONDS)
++                .build();
++    }
++
++    // ===== API PUBLIQUE =====
++
++    public void pushServerStatus(int online, int max, String version) {
++        post(EP_SERVER, Map.of(
++                "online_players", online,
++                "max_players",    max,
++                "version",        version
++        ));
++    }
++
++    public void pushStructurePrice(String name, double price, String category) {
++        post(EP_MARKET, Map.of(
++                "name",     name,
++                "price",    price,
++                "category", category
++        ));
++    }
++
++    public void pushPlayerBalance(String username, double balance, int structures) {
++        post(EP_LEADER, Map.of(
++                "username",   username,
++                "balance",    balance,
++                "structures", structures
++        ));
++    }
++
++    public void pushPlayerInventory(String username, List<OwnedStructure> items) {
++        post(EP_INVENTORY, Map.of(
++                "username",   username,
++                "structures", items
++        ));
++    }
++
++    // ===== HTTP =====
++
++    private void post(String path, Object bodyObj) {
++        Request req = new Request.Builder()
++                .url(baseUrl + path)
++                .header("X-API-Key", apiKey)
++                .header("Content-Type", "application/json")
++                .post(RequestBody.create(gson.toJson(bodyObj), JSON))
++                .build();
++
++        http.newCall(req).enqueue(new Callback() {
++            @Override public void onFailure(Call call, IOException e) {
++                plugin.getLogger().log(Level.WARNING,
++                        "[WebAPI] echec POST " + path + " : " + e.getMessage());
++            }
++            @Override public void onResponse(Call call, Response response) {
++                try (Response r = response) {
++                    if (!r.isSuccessful()) {
++                        plugin.getLogger().warning(
++                                "[WebAPI] " + path + " -> HTTP " + r.code());
++                    }
++                }
++            }
++        });
++    }
++
++    private static String stripTrailingSlash(String s) {
++        return s.endsWith("/") ? s.substring(0, s.length() - 1) : s;
++    }
++
++    // ===== DTO =====
++
++    public static class OwnedStructure {
++        public final String name;
++        public final int qty;
++        public final double value;
++        public OwnedStructure(String name, int qty, double value) {
++            this.name = name; this.qty = qty; this.value = value;
++        }
++    }
++}
+-- 
+2.39.5
+
