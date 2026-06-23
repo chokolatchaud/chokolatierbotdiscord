@@ -329,6 +329,7 @@ async def admin_create_site(data: VoteSiteIn, _: dict = Depends(get_admin_user))
         raise HTTPException(status_code=400, detail="Un site avec ce nom existe déjà")
     doc = data.model_dump()
     await db.vote_sites.insert_one(doc)
+    doc.pop("_id", None)
     return doc
 
 

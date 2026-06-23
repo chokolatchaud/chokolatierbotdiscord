@@ -24,21 +24,20 @@ Affichage de l'IP du serveur `mine.farm-and.fr`. Page prête pour implémenter l
   - `GET /api/market/structures`, `GET /api/market/structures/{name}/history`, `POST` (plugin)
   - `GET /api/leaderboard`, `POST` (plugin)
   - `GET /api/vote/sites`
-  - Auth: `register`, `login`, `logout`, `me`
-- Frontend pages: Home (hero + IP copier), Marché (cards + courbes Recharts + search), Classement (podium + table), Vote (4 sites + bannière info), Login, Register
-- Navbar + Footer + AuthContext
-- Seed MongoDB: 8 structures avec historique 40 points, 10 entrées leaderboard, 4 sites de vote
-- Polices: Outfit (titres), Inter (corps), JetBrains Mono (stats), Silkscreen (pixel accents)
-- All testing passed (100% backend + frontend)
+  - Auth: `register`, `login`, `logout`, `me` (with role)
+  - **Player Dashboard**: `GET /api/player/me`
+  - **Plugin**: `POST /api/player/inventory`
+  - **Admin Vote Sites**: GET/POST/PUT/DELETE `/api/admin/vote-sites[/{name}]`
+- Frontend pages: Home, Marché, Classement, Vote, Login, Register, **Dashboard** (/dashboard), **AdminVotes** (/admin/votes)
+- Navbar shows Dashboard link (auth) + ADMIN badge (admin)
+- ProtectedRoute component (adminOnly support)
+- Admin auto-promotion via env `ADMIN_USERNAME` (default "Admin")
+- Seed MongoDB: 8 structures with 40-pt history, 10 leaderboard entries, 4 vote sites
+- Polices: Outfit / Inter / JetBrains Mono / Silkscreen
+- Tests: 100% iter1 + 100% iter2 (after fix of insert_one ObjectId bug)
 
-## Personas
-- Joueur Minecraft (consulte le marché, vote, regarde son rang)
-- Administrateur du serveur (configure sites de vote, branche le plugin sur API)
-
-## Backlog (P0/P1/P2)
-- P1: Dashboard joueur (solde personnel + portefeuille de structures)
-- P1: Interface admin pour configurer les vraies URL de vote
-- P2: Forgot-password / changement de mot de passe
+## Backlog (P1/P2)
+- P2: Forgot-password / change password
 - P2: Détail d'une structure avec historique long (page dédiée)
 - P2: Notifications temps réel (WebSocket) pour les variations de prix
 - P2: Intégration discord webhook lors des gros mouvements de marché
