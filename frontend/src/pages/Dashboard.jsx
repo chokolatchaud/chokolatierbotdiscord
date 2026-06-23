@@ -160,7 +160,3 @@ function StatBlock({ icon, label, value, testId }) {
     </div>
   );
 }
-old text-3xl mt-3">{value}</p>
-    </div>
-  );
-}

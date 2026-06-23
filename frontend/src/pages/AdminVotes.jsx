@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api, formatApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Pencil, Check, X, Vote as VoteIcon } from "lucide-react";
+import { Plus, Trash2, Pencil, Check, X, Vote as VoteIcon, Settings } from "lucide-react";
 
 const empty = { name: "", url: "", reward: "", order: 1, configured: true };
 
@@ -84,6 +85,15 @@ export default function AdminVotes() {
           <Plus className="w-4 h-4 mr-2" />
           {creating ? "Annuler" : "Ajouter un site"}
         </Button>
+      </div>
+
+      <div className="mb-6">
+        <Link to="/admin/settings" data-testid="admin-link-settings">
+          <Button variant="outline" className="bg-transparent border-gold-soft text-gold hover:bg-gold-soft">
+            <Settings className="w-4 h-4 mr-2" />
+            Paramètres du site (IP, maintenance, textes)
+          </Button>
+        </Link>
       </div>
 
       {error && (

@@ -190,17 +190,18 @@ async def change_password(data: ChangePasswordIn,
 # ---------------- Server Status ----------------
 @api_router.get("/server/status")
 async def server_status():
+    settings = await get_settings_doc()
     state = await db.server_state.find_one({"id": "main"}, {"_id": 0})
     if not state:
         state = {
-            "ip": SERVER_IP,
             "online_players": 0,
             "max_players": 100,
             "version": "1.21",
-            "motd": "Farm & Build — Freebuild économique",
             "updated_at": datetime.now(timezone.utc).isoformat(),
         }
-    state["ip"] = SERVER_IP
+    state["ip"] = settings["ip"]
+    state["motd"] = settings["motd"]
+    state["maintenance"] = settings["maintenance"]
     return state
 
 
@@ -271,6 +272,57 @@ async def upsert_leaderboard(data: LeaderboardEntryIn):
     }
     await db.leaderboard.update_one({"username": data.username}, {"$set": doc}, upsert=True)
     return doc
+
+
+# ---------------- Site Settings (admin-editable texts) ----------------
+DEFAULT_SETTINGS = {
+    "id": "site",
+    "ip": SERVER_IP,
+    "motd": "Farm & Build — Freebuild économique",
+    "hero_title_accent": "réinventé",
+    "hero_subtitle": "Construis ce que tu veux. Définis tes structures. Le marché fixe leur valeur. Plus la demande monte, plus tu gagnes.",
+    "discord_url": "",
+    "maintenance": False,
+    "maintenance_message": "Le serveur est en maintenance. On revient très vite.",
+}
+
+
+async def get_settings_doc() -> dict:
+    doc = await db.settings.find_one({"id": "site"}, {"_id": 0})
+    if not doc:
+        doc = DEFAULT_SETTINGS.copy()
+        await db.settings.insert_one(doc.copy())
+    # Ensure all keys exist (forward-compat)
+    for k, v in DEFAULT_SETTINGS.items():
+        doc.setdefault(k, v)
+    return doc
+
+
+class SettingsIn(BaseModel):
+    ip: Optional[str] = None
+    motd: Optional[str] = None
+    hero_title_accent: Optional[str] = None
+    hero_subtitle: Optional[str] = None
+    discord_url: Optional[str] = None
+    maintenance: Optional[bool] = None
+    maintenance_message: Optional[str] = None
+
+
+@api_router.get("/settings")
+async def public_settings():
+    return await get_settings_doc()
+
+
+@api_router.put("/admin/settings")
+async def admin_update_settings(data: SettingsIn,
+                                _: dict = Depends(get_admin_user)):
+    update = {k: v for k, v in data.model_dump().items() if v is not None}
+    if not update:
+        raise HTTPException(status_code=400, detail="Aucun changement fourni")
+    await db.settings.update_one(
+        {"id": "site"}, {"$set": update}, upsert=True
+    )
+    return await get_settings_doc()
 
 
 # ---------------- Vote Sites ----------------

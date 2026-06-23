@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import IPCopier from "@/components/IPCopier";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+import { useSettings } from "@/context/SettingsContext";
 import { ArrowRight, TrendingUp, Trophy, Vote, Users, Zap } from "lucide-react";
 
 export default function Home() {
+  const { settings } = useSettings();
   const [status, setStatus] = useState({ online_players: 0, max_players: 100, version: "1.21" });
   const [structures, setStructures] = useState([]);
 
@@ -13,6 +15,11 @@ export default function Home() {
     api.get("/server/status").then((r) => setStatus(r.data)).catch(() => {});
     api.get("/market/structures").then((r) => setStructures(r.data.slice(0, 4))).catch(() => {});
   }, []);
+
+  const ip = settings?.ip || status?.ip || "mine.farm-and.fr";
+  const accent = settings?.hero_title_accent || "réinventé";
+  const subtitle = settings?.hero_subtitle ||
+    "Construis ce que tu veux. Définis tes structures. Le marché fixe leur valeur.";
 
   return (
     <div>
@@ -42,16 +49,15 @@ export default function Home() {
             <h1 className="font-display font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight mt-6 leading-[1.05]">
               Le freebuild
               <br />
-              <span className="text-gold">réinventé</span> par l'économie.
+              <span className="text-gold">{accent}</span> par l'économie.
             </h1>
 
             <p className="mt-6 text-base md:text-lg text-zinc-400 max-w-xl">
-              Construis ce que tu veux. Définis tes structures. Le marché fixe leur valeur.
-              Plus la demande monte, plus tu gagnes. Bienvenue sur Farm & Build.
+              {subtitle}
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <IPCopier ip="mine.farm-and.fr" />
+              <IPCopier ip={ip} />
               <Link to="/marche" data-testid="cta-market">
                 <Button size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-sm h-[60px] px-6">
                   Voir le marché <ArrowRight className="w-4 h-4 ml-2" />
