@@ -1,0 +1,16 @@
+# Configuration Farmland
+# ⚠ Ne JAMAIS mettre de vraies URL de webhook ici, ce fichier est dans le repo Git public !
+# Remplis les vraies valeurs dans plugins/Farmland/config.yml sur ton serveur, pas ici.
+
+discord:
+  webhook-status: ""
+  webhook-message: ""
+  webhook-moderation: ""
+
+# WebAPI - Site Farm & Build
+# ⚠ Ne JAMAIS mettre la vraie cle ici. Renseigne plugins/Farmland/config.yml sur ton serveur.
+webapi:
+  enabled: false
+  base_url: "https://farm-and-build.preview.emergentagent.com"
+  api_key: ""
+  push_interval_seconds: 30

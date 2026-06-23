@@ -1,8 +1,8 @@
 From 01a6e3021d108721463d96ba6da6228fbebd00cc Mon Sep 17 00:00:00 2001
 From: Farm-and Web Integration <webapi@farmand.fr>
 Date: Tue, 23 Jun 2026 12:03:07 +0000
-Subject: [PATCH] feat(api): ajout WebApiClient pour pousser les donnees vers
- le site Farm & Build
+Subject: [PATCH 1/2] feat(api): ajout WebApiClient pour pousser les donnees
+ vers le site Farm & Build
 
 - Nouveau package fr.kevyn.farmland.api avec WebApiClient.java
 - 4 methodes async : pushServerStatus, pushStructurePrice, pushPlayerBalance, pushPlayerInventory
@@ -275,6 +275,36 @@ index 0000000..37d842a
 +        }
 +    }
 +}
+-- 
+2.39.5
+
+
+From 72a8b66164124e166203257b32d899db921eafd3 Mon Sep 17 00:00:00 2001
+From: Farm-and Web Integration <webapi@farmand.fr>
+Date: Tue, 23 Jun 2026 12:10:35 +0000
+Subject: [PATCH 2/2] feat(api): ajout bloc webapi dans config.yml (placeholder
+ vide, meme pattern que discord)
+
+---
+ src/main/resources/config.yml | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/main/resources/config.yml b/src/main/resources/config.yml
+index b8a3c8f..df76b38 100644
+--- a/src/main/resources/config.yml
++++ b/src/main/resources/config.yml
+@@ -6,3 +6,11 @@ discord:
+   webhook-status: ""
+   webhook-message: ""
+   webhook-moderation: ""
++
++# WebAPI - Site Farm & Build
++# ⚠ Ne JAMAIS mettre la vraie cle ici. Renseigne plugins/Farmland/config.yml sur ton serveur.
++webapi:
++  enabled: false
++  base_url: "https://farm-and-build.preview.emergentagent.com"
++  api_key: ""
++  push_interval_seconds: 30
 -- 
 2.39.5
 
