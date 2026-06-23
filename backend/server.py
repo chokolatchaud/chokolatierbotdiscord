@@ -167,6 +167,26 @@ async def me(user: dict = Depends(get_current_user)):
     return user
 
 
+class ChangePasswordIn(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=6, max_length=128)
+
+
+@api_router.post("/auth/change-password")
+async def change_password(data: ChangePasswordIn,
+                          user: dict = Depends(get_current_user)):
+    full = await db.users.find_one({"id": user["id"]})
+    if not full or not verify_password(data.current_password, full["password_hash"]):
+        raise HTTPException(status_code=400, detail="Mot de passe actuel incorrect")
+    if data.current_password == data.new_password:
+        raise HTTPException(status_code=400, detail="Le nouveau mot de passe doit être différent")
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"password_hash": hash_password(data.new_password)}},
+    )
+    return {"ok": True}
+
+
 # ---------------- Server Status ----------------
 @api_router.get("/server/status")
 async def server_status():
@@ -428,7 +448,9 @@ async def seed_demo_data():
 @app.on_event("startup")
 async def startup_event():
     await seed_demo_data()
-    # Auto-create / update admin account
+    # Auto-create admin account on first boot only.
+    # We DO NOT overwrite the password on later restarts so that admin can
+    # change it freely through /api/auth/change-password.
     existing = await db.users.find_one({"username_lower": ADMIN_USERNAME.lower()})
     if existing is None:
         await db.users.insert_one({
@@ -439,14 +461,10 @@ async def startup_event():
             "role": "admin",
             "created_at": datetime.now(timezone.utc).isoformat(),
         })
-    else:
-        update = {"role": "admin"}
-        # If existing admin doesn't have the configured password yet, sync it
-        if not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
-            update["password_hash"] = hash_password(ADMIN_PASSWORD)
+    elif existing.get("role") != "admin":
         await db.users.update_one(
             {"username_lower": ADMIN_USERNAME.lower()},
-            {"$set": update},
+            {"$set": {"role": "admin"}},
         )
 
 

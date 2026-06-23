@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Trophy, Wallet, Package, Link2, ArrowRight } from "lucide-react";
+import ChangePasswordCard from "@/components/ChangePasswordCard";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -156,6 +157,10 @@ function StatBlock({ icon, label, value, testId }) {
         <span className="text-emerald-400">{icon}</span>
       </div>
       <p className="font-mono-stat font-bold text-3xl mt-3">{value}</p>
+    </div>
+  );
+}
+old text-3xl mt-3">{value}</p>
     </div>
   );
 }
