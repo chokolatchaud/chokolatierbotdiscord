@@ -26,14 +26,37 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">
-      <div className="mb-10">
-        <p className="font-pixel text-xs text-emerald-400">DASHBOARD</p>
-        <h1 className="font-display font-extrabold text-4xl md:text-5xl mt-2">
-          Bonjour, <span className="text-emerald-400">{user.username}</span>.
-        </h1>
-        <p className="text-zinc-400 mt-2">
-          Ton portefeuille de structures cotées sur le marché Farm & Build.
-        </p>
+      {/* Hero banner */}
+      <div
+        data-testid="dashboard-hero"
+        className="relative overflow-hidden border border-border rounded-sm mb-10 h-44 md:h-56"
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "url(https://images.pexels.com/photos/18419510/pexels-photo-18419510.jpeg)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(115deg, rgba(10,10,11,0.92) 0%, rgba(10,10,11,0.7) 45%, rgba(245,197,24,0.18) 100%)",
+          }}
+        />
+        <div className="absolute inset-0 pixel-grid opacity-40" />
+        <div className="relative h-full flex flex-col justify-center px-6 md:px-10">
+          <p className="font-pixel text-xs text-gold">DASHBOARD</p>
+          <h1 className="font-display font-extrabold text-3xl md:text-5xl mt-2 leading-tight">
+            Bonjour, <span className="text-gold">{user.username}</span>.
+          </h1>
+          <p className="text-zinc-300 mt-2 text-sm md:text-base max-w-xl">
+            Ton portefeuille de structures cotées sur le marché Farm & Build.
+          </p>
+        </div>
       </div>
 
       {!data?.linked && (

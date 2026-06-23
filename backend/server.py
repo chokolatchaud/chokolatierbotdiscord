@@ -32,6 +32,7 @@ JWT_SECRET = os.environ['JWT_SECRET']
 PLUGIN_API_KEY = os.environ['PLUGIN_API_KEY']
 SERVER_IP = os.environ.get('SERVER_IP', 'mine.farm-and.fr')
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'Admin')
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'admin78')
 
 
 # ---------------- Helpers ----------------
@@ -427,11 +428,26 @@ async def seed_demo_data():
 @app.on_event("startup")
 async def startup_event():
     await seed_demo_data()
-    # promote configured ADMIN_USERNAME if user exists
-    await db.users.update_one(
-        {"username_lower": ADMIN_USERNAME.lower()},
-        {"$set": {"role": "admin"}},
-    )
+    # Auto-create / update admin account
+    existing = await db.users.find_one({"username_lower": ADMIN_USERNAME.lower()})
+    if existing is None:
+        await db.users.insert_one({
+            "id": str(uuid.uuid4()),
+            "username": ADMIN_USERNAME,
+            "username_lower": ADMIN_USERNAME.lower(),
+            "password_hash": hash_password(ADMIN_PASSWORD),
+            "role": "admin",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    else:
+        update = {"role": "admin"}
+        # If existing admin doesn't have the configured password yet, sync it
+        if not verify_password(ADMIN_PASSWORD, existing["password_hash"]):
+            update["password_hash"] = hash_password(ADMIN_PASSWORD)
+        await db.users.update_one(
+            {"username_lower": ADMIN_USERNAME.lower()},
+            {"$set": update},
+        )
 
 
 @app.on_event("shutdown")
