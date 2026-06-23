@@ -1,0 +1,35 @@
+{
+  "summary": "First-finish smoke test of Farm & Build (Minecraft freebuild site). 13 backend endpoints + 5 frontend flows verified. All critical paths working.",
+  "tested_scope": ["backend", "frontend", "auth", "integration"],
+  "passed": [
+    "GET /api/server/status returns ip=mine.farm-and.fr, max_players=100 (200)",
+    "GET /api/market/structures returns 8 structures with price/previous_price/change_pct/history fields (200)",
+    "GET /api/market/structures/{name}/history returns history array (200)",
+    "GET /api/leaderboard returns 10 entries sorted, Steve_Builder at top (balance=125430.5)",
+    "GET /api/vote/sites returns 4 sites ordered 1-4",
+    "POST /api/auth/register creates user, returns token, sets cookie (200)",
+    "Duplicate registration returns 400 with FR error message",
+    "POST /api/auth/login invalid creds returns 401",
+    "GET /api/auth/me with cookie returns user (200); without cookie returns 401",
+    "POST /api/auth/logout returns 200",
+    "POST /api/market/structures without X-API-Key returns 403; with key upserts + appends history (200)",
+    "POST /api/leaderboard with X-API-Key upserts entry (200)",
+    "POST /api/server/status with X-API-Key returns {ok:true}",
+    "Frontend Home: IP 'mine.farm-and.fr' displayed, copy-ip-button click OK, server-online badge shows 5/100 after plugin update",
+    "Frontend Market /marche: 9 structure cards rendered (8 seed + TestStruct from plugin POST), search filter 'Château' narrows to 1 card",
+    "Frontend Leaderboard /classement: Steve_Builder visible in DOM",
+    "Frontend Vote /vote: 4 vote buttons (vote-btn-*) rendered",
+    "Frontend Register flow: created UITest91656 -> navbar-username appears",
+    "Frontend Logout: logout-btn click -> login-nav-btn reappears",
+    "Frontend Login flow: re-login with same creds -> navbar-username restored"
+  ],
+  "failed": [],
+  "minor_observations": [
+    "Recharts emits 'width(-1) height(-1)' warnings on Market mini-charts during initial render (cosmetic, charts still render via ResponsiveContainer)",
+    "401 console errors on /api/auth/me before login are expected (cookie absent)"
+  ],
+  "action_items": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "retest_needed": false,
+  "full_testing_deferred": true
+}
