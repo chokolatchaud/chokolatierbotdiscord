@@ -36,7 +36,7 @@ export default function Market() {
             Le marché des structures.
           </h1>
           <p className="text-zinc-400 mt-2 max-w-2xl">
-            Les prix sont mis à jour par le plugin économique du serveur Farm & Build.
+            Les prix sont mis à jour par le plugin économique du serveur Farmland.
             Achète bas, construis grand, vends haut.
           </p>
         </div>

@@ -20,7 +20,7 @@ export default function Leaderboard() {
           Top des fortunes.
         </h1>
         <p className="text-zinc-400 mt-2">
-          Les architectes les plus riches du serveur Farm & Build.
+          Les architectes les plus riches du serveur Farmland.
         </p>
       </div>
 

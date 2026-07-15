@@ -51,7 +51,7 @@ export default function Vote() {
             Les sites de vote ne sont pas encore configurés.
           </p>
           <p className="text-xs text-zinc-500 mt-2 font-mono-stat">
-            Connecte-toi en admin → <code className="text-emerald-400">/admin/votes</code> pour les ajouter.
+            Les sites de vote sont configurés depuis le serveur Minecraft (config.yml du plugin).
           </p>
         </div>
       ) : (
