@@ -98,7 +98,7 @@ export default function AdminSettings() {
                 data-testid="settings-ip"
                 value={s.ip}
                 onChange={set("ip")}
-                placeholder="mine.farm-and.fr"
+                placeholder="mine.farm-land.fr"
                 className="bg-[#0A0A0B] border-border rounded-sm font-mono-stat mt-1"
                 required
               />

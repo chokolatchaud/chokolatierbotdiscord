@@ -33,8 +33,12 @@ export function AuthProvider({ children }) {
   const register = async (username, password) => {
     try {
       const { data } = await api.post("/auth/register", { username, password });
+      if (data.verified === false) {
+        // Compte créé mais pas encore vérifié : on ne connecte pas, on retourne le code
+        return { ok: true, data };
+      }
       setUser(data);
-      return { ok: true };
+      return { ok: true, data };
     } catch (e) {
       return { ok: false, error: formatApiError(e) };
     }

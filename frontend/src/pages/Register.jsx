@@ -14,6 +14,7 @@ export default function Register() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [linkCode, setLinkCode] = useState(null);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -25,9 +26,40 @@ export default function Register() {
     setBusy(true);
     const res = await register(username.trim(), password);
     setBusy(false);
-    if (res.ok) navigate("/");
-    else setError(res.error);
+    if (res.ok) {
+      if (res.data?.verified === false && res.data?.link_code) {
+        // Compte créé mais pas encore vérifié → afficher le code
+        setLinkCode(res.data.link_code);
+      } else {
+        navigate("/");
+      }
+    } else {
+      setError(res.error);
+    }
   };
+
+  // Affichage du code de vérification
+  if (linkCode) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md text-center">
+          <div className="inline-flex w-12 h-12 items-center justify-center rounded-sm mb-4" style={{background: "linear-gradient(135deg, #10B981 0%, #F5C518 100%)"}}>
+            <Pickaxe className="w-6 h-6 text-black" strokeWidth={3} />
+          </div>
+          <p className="font-pixel text-xs text-gold mb-2">VÉRIFICATION DU COMPTE</p>
+          <h1 className="font-display font-extrabold text-2xl mb-6">Une dernière étape !</h1>
+          <div className="border border-border bg-[#121418] p-6 rounded-sm space-y-4">
+            <p className="text-zinc-400 text-sm">Connecte-toi sur le serveur Minecraft et tape :</p>
+            <div className="bg-[#0A0A0B] border border-border rounded-sm p-4">
+              <p className="font-mono text-emerald-400 text-lg">/linkaccount {linkCode}</p>
+            </div>
+            <p className="text-zinc-500 text-xs">⚠ Ce code expire dans 10 minutes</p>
+            <p className="text-zinc-500 text-xs">Adresse du serveur : <span className="text-white">mine.farm-land.fr</span></p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-6 py-12">

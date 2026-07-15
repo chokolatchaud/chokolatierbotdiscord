@@ -26,7 +26,7 @@ export default function Vote() {
         </p>
       </div>
 
-      <div className="border border-emerald-500/20 bg-emerald-500/5 p-5 rounded-sm mb-8 flex items-center gap-4" data-testid="vote-info-banner">
+      <div className="border border-emerald-500/20 bg-emerald-500/5 p-5 rounded-sm mb-8 flex items-center gap-4">
         <div className="w-10 h-10 bg-emerald-500/20 flex items-center justify-center rounded-sm">
           <Clock className="w-5 h-5 text-emerald-400" />
         </div>
@@ -41,52 +41,32 @@ export default function Vote() {
       {loading ? (
         <div className="space-y-3">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 border border-border bg-[#121418] animate-pulse rounded-sm" />
+            <div key={i} className="h-24 border border-border bg-[#121418] rounded-sm" />
           ))}
         </div>
       ) : sites.length === 0 ? (
-        <div className="border border-dashed border-border rounded-sm p-12 text-center" data-testid="vote-empty">
+        <div className="border border-dashed border-border rounded-sm p-12 text-center">
           <p className="font-pixel text-xs text-zinc-500">AUCUN SITE</p>
-          <p className="text-zinc-400 mt-3">
-            Les sites de vote ne sont pas encore configurés.
-          </p>
-          <p className="text-xs text-zinc-500 mt-2 font-mono-stat">
-            Connecte-toi en admin → <code className="text-emerald-400">/admin/votes</code> pour les ajouter.
-          </p>
+          <p className="text-zinc-400 mt-3">Les sites de vote arrivent bientôt.</p>
         </div>
       ) : (
-        <div className="space-y-3" data-testid="vote-sites-list">
+        <div className="space-y-3">
           {sites.map((site, idx) => (
             <div
               key={site.name}
-              data-testid={`vote-site-${idx + 1}`}
-              className="border border-border bg-[#121418] p-5 rounded-sm lift-card flex items-center gap-5"
+              className="border border-border bg-[#121418] p-5 rounded-sm flex items-center gap-5"
             >
               <div className="w-12 h-12 bg-[#0A0A0B] border border-border flex items-center justify-center rounded-sm">
                 <span className="font-pixel text-emerald-400 text-sm">#{idx + 1}</span>
               </div>
-
               <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-display font-bold text-lg">{site.name}</h3>
-                  {!site.configured && (
-                    <span className="font-pixel text-[9px] text-amber-400 border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 rounded-sm">
-                      À CONFIGURER
-                    </span>
-                  )}
-                </div>
+                <h3 className="font-display font-bold text-lg">{site.name}</h3>
                 <div className="flex items-center gap-2 mt-1.5 text-sm text-zinc-400">
                   <Gift className="w-3.5 h-3.5 text-emerald-400" />
                   <span>{site.reward}</span>
                 </div>
               </div>
-
-              <a
-                href={site.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid={`vote-btn-${idx + 1}`}
-              >
+              <a href={site.url} target="_blank" rel="noopener noreferrer">
                 <Button className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-sm">
                   <VoteIcon className="w-4 h-4 mr-2" />
                   Voter
@@ -97,16 +77,6 @@ export default function Vote() {
           ))}
         </div>
       )}
-
-      <div className="mt-12 border border-dashed border-border p-6 rounded-sm">
-        <p className="font-pixel text-xs text-zinc-500">POUR L'ADMINISTRATEUR</p>
-        <p className="text-sm text-zinc-400 mt-2">
-          Cette page est prête à recevoir les liens de vote réels. Configure les URL des
-          sites dans la base de données <code className="font-mono-stat text-emerald-400">vote_sites</code> ou
-          via une future interface admin. Le plugin Minecraft pourra créditer
-          automatiquement les récompenses via l'endpoint <code className="font-mono-stat text-emerald-400">POST /api/leaderboard</code>.
-        </p>
-      </div>
     </div>
   );
 }

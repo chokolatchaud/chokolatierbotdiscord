@@ -5,11 +5,11 @@ export default function Footer() {
         <div>
           <p className="font-pixel text-xs text-gold">FARM & BUILD</p>
           <p className="text-sm text-zinc-400 mt-1">
-            Serveur Minecraft freebuild économique — mine.farm-and.fr
+            Serveur Minecraft freebuild économique — mine.farm-land.fr
           </p>
         </div>
         <p className="text-xs text-zinc-500 font-mono-stat">
-          © {new Date().getFullYear()} farm-and.fr · Non affilié à Mojang
+          © {new Date().getFullYear()} farm-land.fr · Non affilié à Mojang
         </p>
       </div>
     </footer>
