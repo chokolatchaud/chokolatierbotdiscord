@@ -141,6 +141,27 @@ async def leaderboard():
     return rows[:50]
 
 
+@api_router.get("/leaderboard/argent")
+async def leaderboard_argent():
+    rows = list(STORE["leaderboard"].values())
+    rows.sort(key=lambda x: x.get("balance", 0), reverse=True)
+    return rows[:20]
+
+
+@api_router.get("/leaderboard/structures")
+async def leaderboard_structures():
+    rows = list(STORE["leaderboard"].values())
+    rows.sort(key=lambda x: x.get("structures", 0), reverse=True)
+    return rows[:20]
+
+
+@api_router.get("/leaderboard/blocpose")
+async def leaderboard_blocpose():
+    rows = list(STORE["leaderboard"].values())
+    rows.sort(key=lambda x: x.get("blocpose", 0), reverse=True)
+    return rows[:20]
+
+
 @api_router.get("/vote/sites")
 async def vote_sites():
     sites = list(STORE["vote_sites"])

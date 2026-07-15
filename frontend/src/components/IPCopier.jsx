@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 
-export default function IPCopier({ ip = "mine.farm-and.fr", size = "lg" }) {
+export default function IPCopier({ ip = "mine.farm-land.fr", size = "lg" }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {

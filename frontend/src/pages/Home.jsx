@@ -16,7 +16,7 @@ export default function Home() {
     api.get("/market/structures").then((r) => setStructures(r.data.slice(0, 4))).catch(() => {});
   }, []);
 
-  const ip = settings?.ip || status?.ip || "mine.farm-and.fr";
+  const ip = settings?.ip || status?.ip || "mine.farm-land.fr";
   const accent = settings?.hero_title_accent || "réinventé";
   const subtitle = settings?.hero_subtitle ||
     "Construis ce que tu veux. Définis tes structures. Le marché fixe leur valeur.";

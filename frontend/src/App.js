@@ -6,6 +6,7 @@ import Home from "@/pages/Home";
 import Market from "@/pages/Market";
 import Leaderboard from "@/pages/Leaderboard";
 import Vote from "@/pages/Vote";
+import Guide from "@/pages/Guide";
 import { SettingsProvider } from "@/context/SettingsContext";
 import MaintenanceBanner from "@/components/MaintenanceBanner";
 import { Toaster } from "@/components/ui/sonner";
@@ -23,6 +24,7 @@ function App() {
               <Route path="/marche" element={<Market />} />
               <Route path="/classement" element={<Leaderboard />} />
               <Route path="/vote" element={<Vote />} />
+              <Route path="/guide" element={<Guide />} />
             </Routes>
           </main>
           <Footer />

@@ -6,6 +6,7 @@ const links = [
   { to: "/marche", label: "Marché", id: "nav-market" },
   { to: "/classement", label: "Classement", id: "nav-leaderboard" },
   { to: "/vote", label: "Vote", id: "nav-vote" },
+  { to: "/guide", label: "Guide", id: "nav-guide" },
 ];
 
 export default function Navbar() {
