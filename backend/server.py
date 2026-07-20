@@ -40,6 +40,7 @@ STORE = {
     "structures": {},           # name -> {name, price, change_pct, history[100], ...}
     "leaderboard": {},          # username -> {username, balance, structures, blocpose, updated_at}
     "vote_sites": [],           # [{name, url, reward, order}]
+    "boat_times": [],           # [{playerName, seconds}] deja tries du plus rapide au plus lent
 }
 
 
@@ -90,6 +91,11 @@ class VoteSiteIn(BaseModel):
     url: str
     reward: str = ""
     order: int = 999
+
+
+class BoatTimeEntryIn(BaseModel):
+    playerName: str
+    seconds: int
 
 
 # ---------------- Endpoints publics (lecture) ----------------
@@ -169,6 +175,11 @@ async def vote_sites():
     return sites
 
 
+@api_router.get("/boatrace/times")
+async def boat_times():
+    return STORE["boat_times"]
+
+
 # ---------------- Endpoints plugin (écriture, clé API requise) ----------------
 @api_router.post("/server/status")
 async def update_server_status(data: ServerStatusIn, _: bool = None, x_api_key: Optional[str] = Header(None)):
@@ -220,6 +231,16 @@ async def replace_vote_sites(sites: List[VoteSiteIn], x_api_key: Optional[str] =
     STORE["vote_sites"] = [s.model_dump() for s in sites]
     touch_push()
     return {"ok": True, "count": len(STORE["vote_sites"])}
+
+
+@api_router.post("/boatrace/times")
+async def replace_boat_times(times: List[BoatTimeEntryIn], x_api_key: Optional[str] = Header(None)):
+    """Le plugin pousse le classement COMPLET des meilleurs temps (deja trie).
+    Une seule source de verite : le serveur Minecraft."""
+    require_plugin_key(x_api_key)
+    STORE["boat_times"] = [t.model_dump() for t in times]
+    touch_push()
+    return {"ok": True, "count": len(STORE["boat_times"])}
 
 
 # ---------------- Mount ----------------
