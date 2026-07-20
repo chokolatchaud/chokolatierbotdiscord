@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { Crown, Medal, Trophy, Coins, Building2, Hammer } from "lucide-react";
+import { Crown, Medal, Trophy, Coins, Building2, Hammer, Sailboat } from "lucide-react";
 
 const TABS = [
-  { id: "argent",     label: "Argent",     endpoint: "/leaderboard/argent",     icon: Coins,     unit: "$FB",  field: "balance",    color: "text-yellow-400" },
-  { id: "structures", label: "Structures", endpoint: "/leaderboard/structures", icon: Building2, unit: "str.", field: "structures", color: "text-emerald-400" },
-  { id: "blocpose",   label: "Bâtisseurs", endpoint: "/leaderboard/blocpose",   icon: Hammer,    unit: "blocs", field: "blocpose",  color: "text-blue-400" },
+  { id: "argent",     label: "Argent",     endpoint: "/leaderboard/argent",     icon: Coins,     unit: "$FB",  field: "balance",    nameField: "username",   color: "text-yellow-400" },
+  { id: "structures", label: "Structures", endpoint: "/leaderboard/structures", icon: Building2, unit: "str.", field: "structures", nameField: "username",   color: "text-emerald-400" },
+  { id: "blocpose",   label: "Bâtisseurs", endpoint: "/leaderboard/blocpose",   icon: Hammer,    unit: "blocs", field: "blocpose",  nameField: "username",   color: "text-blue-400" },
+  { id: "bateaux",    label: "Bateaux",    endpoint: "/boatrace/times",         icon: Sailboat,  unit: "temps", field: "seconds",   nameField: "playerName", color: "text-cyan-400" },
 ];
 
 function formatVal(val, unit) {
@@ -18,6 +19,11 @@ function formatVal(val, unit) {
     if (val >= 1_000_000) return (val / 1_000_000).toFixed(1) + "M blocs";
     if (val >= 1_000)     return (val / 1_000).toFixed(1) + "k blocs";
     return val + " blocs";
+  }
+  if (unit === "temps") {
+    const minutes = Math.floor(val / 60);
+    const seconds = val % 60;
+    return minutes > 0 ? `${minutes}m ${String(seconds).padStart(2, "0")}s` : `${seconds}s`;
   }
   return val + " " + unit;
 }
@@ -86,10 +92,10 @@ export default function Leaderboard() {
                   ? "from-yellow-500/15 via-emerald-500/5 to-transparent"
                   : "from-emerald-500/10 to-transparent";
                 return (
-                  <div key={p.username} className="flex flex-col items-center">
+                  <div key={p[tab.nameField]} className="flex flex-col items-center">
                     <Icon className={`w-8 h-8 ${colorCls} mb-2`} />
                     <p className="font-display font-bold text-sm md:text-base text-center truncate w-full">
-                      {p.username}
+                      {p[tab.nameField]}
                     </p>
                     <p className={`font-mono font-bold text-xs md:text-sm ${tab.color}`}>
                       {formatVal(p[tab.field] || 0, tab.unit)}
@@ -111,10 +117,10 @@ export default function Leaderboard() {
               <div className="col-span-4 text-right">{tab.label.toUpperCase()}</div>
             </div>
             {rows.slice(3).map((p, idx) => (
-              <div key={p.username}
+              <div key={p[tab.nameField]}
                 className="grid grid-cols-12 px-5 py-3 border-b border-border/50 last:border-0 hover:bg-white/3 transition-colors">
                 <div className="col-span-1 font-pixel text-zinc-500 text-sm">#{idx + 4}</div>
-                <div className="col-span-7 font-display font-bold truncate">{p.username}</div>
+                <div className="col-span-7 font-display font-bold truncate">{p[tab.nameField]}</div>
                 <div className={`col-span-4 text-right font-mono font-bold ${tab.color}`}>
                   {formatVal(p[tab.field] || 0, tab.unit)}
                 </div>
