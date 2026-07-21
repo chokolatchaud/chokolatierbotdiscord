@@ -109,17 +109,17 @@ export default function Leaderboard() {
             </div>
           )}
 
-          {/* Liste rang 4-20 */}
+          {/* Liste : rang 4+ si le podium existe (3+ joueurs), sinon TOUS les joueurs depuis le rang 1 */}
           <div className="border border-border rounded-sm overflow-hidden bg-[#121418]">
             <div className="grid grid-cols-12 px-5 py-3 border-b border-border bg-[#0F1115] text-[10px] font-pixel text-zinc-500">
               <div className="col-span-1">RANG</div>
               <div className="col-span-7">JOUEUR</div>
               <div className="col-span-4 text-right">{tab.label.toUpperCase()}</div>
             </div>
-            {rows.slice(3).map((p, idx) => (
+            {(rows.length >= 3 ? rows.slice(3) : rows).map((p, idx) => (
               <div key={p[tab.nameField]}
                 className="grid grid-cols-12 px-5 py-3 border-b border-border/50 last:border-0 hover:bg-white/3 transition-colors">
-                <div className="col-span-1 font-pixel text-zinc-500 text-sm">#{idx + 4}</div>
+                <div className="col-span-1 font-pixel text-zinc-500 text-sm">#{rows.length >= 3 ? idx + 4 : idx + 1}</div>
                 <div className="col-span-7 font-display font-bold truncate">{p[tab.nameField]}</div>
                 <div className={`col-span-4 text-right font-mono font-bold ${tab.color}`}>
                   {formatVal(p[tab.field] || 0, tab.unit)}
