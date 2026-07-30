@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, ChevronLeft, Pickaxe, TreePine, Axe, MapPin, Coins, CheckCircle } from "lucide-react";
+import { ChevronRight, ChevronLeft, Pickaxe, TreePine, Axe, MapPin, Coins, CheckCircle, ArrowUpCircle, Sailboat, ThumbsUp, Shirt, Clock } from "lucide-react";
 
 const STEPS = [
   {
@@ -184,6 +184,114 @@ const STEPS = [
   },
   {
     id: 5,
+    icon: ArrowUpCircle,
+    color: "text-amber-400",
+    bg: "bg-amber-500/10 border-amber-500/20",
+    tag: "ÉTAPE 5",
+    title: "Améliore ton plot",
+    desc: "Utilise tes $FB pour agrandir la bordure de ton plot avec /plot buy. Les upgrades sont infinis : plus tu avances, plus les prix montent par palier de +20 $FB tous les 21 achats. Construis grand pour construire encore plus grand !",
+    tips: [
+      "Chaque upgrade ajoute +5 blocs de bordure à ton plot",
+      "Le premier palier commence à 50 $FB",
+      "Le système est infini : jamais de plafond",
+      "Un message t'annonce chaque nouveau palier de prix",
+    ],
+    visual: (
+      <svg viewBox="0 0 400 220" className="w-full rounded-sm border border-border">
+        <rect width="400" height="220" fill="#1a1a2e"/>
+        <rect x="0" y="160" width="400" height="60" fill="#2d5a27"/>
+        <rect x="150" y="90" width="100" height="70" fill="none" stroke="#F5C518" strokeWidth="2" strokeDasharray="6,4"/>
+        <rect x="100" y="70" width="200" height="90" fill="none" stroke="#F5C518" strokeWidth="2" strokeDasharray="6,4" opacity="0.5"/>
+        <rect x="60" y="55" width="280" height="105" fill="none" stroke="#F5C518" strokeWidth="2" strokeDasharray="6,4" opacity="0.25"/>
+        <text x="200" y="40" textAnchor="middle" fill="#F5C518" fontSize="12" fontFamily="monospace">Palier 1 → 2 → 3 → ∞</text>
+        <rect x="140" y="8" width="120" height="22" rx="3" fill="#F5C518" opacity="0.15" stroke="#F5C518" strokeWidth="1"/>
+        <text x="200" y="23" textAnchor="middle" fill="#F5C518" fontSize="11" fontFamily="monospace">/plot buy</text>
+      </svg>
+    ),
+  },
+  {
+    id: 6,
+    icon: Sailboat,
+    color: "text-cyan-400",
+    bg: "bg-cyan-500/10 border-cyan-500/20",
+    tag: "ÉTAPE 6",
+    title: "Course de bateaux",
+    desc: "Tape /joinboat depuis n'importe où sur le serveur pour rejoindre la prochaine course. Passe les 3 points de contrôle dans l'ordre puis franchis la ligne d'arrivée le plus vite possible. Le podium du jour rapporte gros !",
+    tips: [
+      "/joinboat fonctionne depuis n'importe où, pas besoin d'être au hub",
+      "Les points de contrôle doivent être passés dans l'ordre",
+      "1er du jour : 500 $FB, 2e : 250 $FB, 3e : 100 $FB",
+      "Ton meilleur temps personnel est affiché sur le site",
+    ],
+    visual: (
+      <svg viewBox="0 0 400 220" className="w-full rounded-sm border border-border">
+        <rect width="400" height="220" fill="#0a1a2e"/>
+        <rect x="0" y="140" width="400" height="80" fill="#1a4a6e"/>
+        <path d="M60,170 L100,170 L90,190 L50,190 Z" fill="#8B6914"/>
+        <circle cx="150" cy="150" r="10" fill="#F5C518" opacity="0.8"/>
+        <circle cx="230" cy="150" r="10" fill="#F5C518" opacity="0.8"/>
+        <circle cx="310" cy="150" r="10" fill="#F5C518" opacity="0.8"/>
+        <text x="150" y="135" textAnchor="middle" fill="#F5C518" fontSize="9" fontFamily="monospace">1</text>
+        <text x="230" y="135" textAnchor="middle" fill="#F5C518" fontSize="9" fontFamily="monospace">2</text>
+        <text x="310" y="135" textAnchor="middle" fill="#F5C518" fontSize="9" fontFamily="monospace">3</text>
+        <rect x="140" y="8" width="120" height="22" rx="3" fill="#22d3ee" opacity="0.15" stroke="#22d3ee" strokeWidth="1"/>
+        <text x="200" y="23" textAnchor="middle" fill="#22d3ee" fontSize="11" fontFamily="monospace">/joinboat</text>
+      </svg>
+    ),
+  },
+  {
+    id: 7,
+    icon: ThumbsUp,
+    color: "text-pink-400",
+    bg: "bg-pink-500/10 border-pink-500/20",
+    tag: "ÉTAPE 7",
+    title: "Vote et cosmétiques",
+    desc: "Tape /vote pour voir les sites de vote du serveur. Chaque vote te donne du temps WorldEdit gratuit. Dépense tes $FB dans /buy cosmetic pour personnaliser ton look avec des chapeaux exclusifs !",
+    tips: [
+      "/vote affiche tous les liens de vote cliquables",
+      "Chaque vote donne 1h de WorldEdit gratuit",
+      "/buy cosmetic ouvre la boutique de chapeaux",
+      "Un cosmétique acheté peut être rééquipé gratuitement à volonté",
+    ],
+    visual: (
+      <svg viewBox="0 0 400 220" className="w-full rounded-sm border border-border">
+        <rect width="400" height="220" fill="#1a1a2e"/>
+        <rect x="60" y="60" width="120" height="130" rx="6" fill="#2a1a3e" stroke="#ec4899" strokeWidth="1.5"/>
+        <text x="120" y="90" textAnchor="middle" fill="#ec4899" fontSize="10" fontFamily="monospace">/vote</text>
+        <text x="120" y="115" textAnchor="middle" fill="#fff" fontSize="9" fontFamily="monospace">+1h WorldEdit</text>
+        <rect x="220" y="60" width="120" height="130" rx="6" fill="#2a1a3e" stroke="#F5C518" strokeWidth="1.5"/>
+        <text x="280" y="90" textAnchor="middle" fill="#F5C518" fontSize="10" fontFamily="monospace">/buy cosmetic</text>
+        <circle cx="280" cy="130" r="18" fill="#F5C518" opacity="0.8"/>
+        <text x="280" y="165" textAnchor="middle" fill="#fff" fontSize="8" fontFamily="monospace">chapeaux exclusifs</text>
+      </svg>
+    ),
+  },
+  {
+    id: 8,
+    icon: Clock,
+    color: "text-orange-400",
+    bg: "bg-orange-500/10 border-orange-500/20",
+    tag: "ÉTAPE 8",
+    title: "Attention à l'AFK",
+    desc: "Si tu restes inactif plus de 20 minutes (aucun mouvement), tu passes en AFK. Tes structures continuent de rapporter, mais au taux réduit hors-ligne (20%) plutôt qu'au taux plein. Reste actif pour profiter à fond du marché !",
+    tips: [
+      "20 minutes sans bouger = statut AFK activé",
+      "Les revenus de structures passent à 20% du taux normal",
+      "Un simple mouvement suffit à redevenir actif",
+      "Le taux plein revient dès que tu bouges à nouveau",
+    ],
+    visual: (
+      <svg viewBox="0 0 400 220" className="w-full rounded-sm border border-border">
+        <rect width="400" height="220" fill="#1a1a2e"/>
+        <circle cx="200" cy="100" r="60" fill="none" stroke="#fb923c" strokeWidth="3"/>
+        <line x1="200" y1="100" x2="200" y2="60" stroke="#fb923c" strokeWidth="3"/>
+        <line x1="200" y1="100" x2="230" y2="100" stroke="#fb923c" strokeWidth="3"/>
+        <text x="200" y="185" textAnchor="middle" fill="#fb923c" fontSize="12" fontFamily="monospace">20 min → AFK → 20% du taux</text>
+      </svg>
+    ),
+  },
+  {
+    id: 9,
     icon: CheckCircle,
     color: "text-emerald-400",
     bg: "bg-emerald-500/10 border-emerald-500/20",
@@ -197,7 +305,12 @@ const STEPS = [
       "/liststructure → Voir toutes tes structures",
       "/viewmoney → Voir les revenus de tes structures",
       "/market → Voir les prix du marché",
-      "/buy worldedit → Acheter WorldEdit (15 $FB / 1h)",
+      "/plot buy → Améliorer la bordure de ton plot",
+      "/buy worldedit → Acheter WorldEdit (200 $FB / 1h)",
+      "/buy cosmetic → Acheter/équiper un chapeau",
+      "/joinboat → Rejoindre la course de bateaux",
+      "/vote → Voir les sites de vote (+1h WorldEdit)",
+      "/hub → Retourner au hub",
       "/money → Voir ton solde $FB",
       "/pay <joueur> <montant> → Envoyer des $FB",
       "/msgf <joueur> <message> → Message privé",
@@ -253,7 +366,7 @@ export default function Guide() {
       <div className="mb-8">
         <p className="font-pixel text-xs text-emerald-400">GUIDE DU JOUEUR</p>
         <h1 className="font-display font-extrabold text-4xl md:text-5xl mt-2">Comment jouer.</h1>
-        <p className="text-zinc-400 mt-2">Apprends à construire, définir et vendre tes structures sur Farmland.</p>
+        <p className="text-zinc-400 mt-2">Construis, améliore ton plot, fais la course, vote et personnalise ton look sur Farmland.</p>
       </div>
 
       {/* Barre de progression */}
