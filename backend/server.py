@@ -38,7 +38,7 @@ STORE = {
     "server_state": None,       # {online_players, max_players, version, updated_at}
     "last_push": None,          # datetime du dernier push reçu (n'importe lequel)
     "structures": {},           # name -> {name, price, change_pct, history[100], ...}
-    "leaderboard": {},          # username -> {username, balance, structures, blocpose, updated_at}
+    "leaderboard": {},          # username -> {username, balance, blocpose, niveauMineur, niveauFarmeur, niveauPecheur, niveauAgriculteur, niveauTueur, updated_at}
     "vote_sites": [],           # [{name, url, reward, order}]
     "boat_times": [],           # [{playerName, seconds}] deja tries du plus rapide au plus lent
 }
@@ -82,8 +82,12 @@ class StructureUpdateIn(BaseModel):
 class LeaderboardEntryIn(BaseModel):
     username: str
     balance: float
-    structures: Optional[int] = 0
     blocpose: Optional[int] = 0
+    niveauMineur: Optional[int] = 0
+    niveauFarmeur: Optional[int] = 0
+    niveauPecheur: Optional[int] = 0
+    niveauAgriculteur: Optional[int] = 0
+    niveauTueur: Optional[int] = 0
 
 
 class VoteSiteIn(BaseModel):
@@ -154,17 +158,45 @@ async def leaderboard_argent():
     return rows[:20]
 
 
-@api_router.get("/leaderboard/structures")
-async def leaderboard_structures():
-    rows = list(STORE["leaderboard"].values())
-    rows.sort(key=lambda x: x.get("structures", 0), reverse=True)
-    return rows[:20]
-
-
 @api_router.get("/leaderboard/blocpose")
 async def leaderboard_blocpose():
     rows = list(STORE["leaderboard"].values())
     rows.sort(key=lambda x: x.get("blocpose", 0), reverse=True)
+    return rows[:20]
+
+
+@api_router.get("/leaderboard/mineur")
+async def leaderboard_mineur():
+    rows = list(STORE["leaderboard"].values())
+    rows.sort(key=lambda x: x.get("niveauMineur", 0), reverse=True)
+    return rows[:20]
+
+
+@api_router.get("/leaderboard/farmeur")
+async def leaderboard_farmeur():
+    rows = list(STORE["leaderboard"].values())
+    rows.sort(key=lambda x: x.get("niveauFarmeur", 0), reverse=True)
+    return rows[:20]
+
+
+@api_router.get("/leaderboard/pecheur")
+async def leaderboard_pecheur():
+    rows = list(STORE["leaderboard"].values())
+    rows.sort(key=lambda x: x.get("niveauPecheur", 0), reverse=True)
+    return rows[:20]
+
+
+@api_router.get("/leaderboard/agriculteur")
+async def leaderboard_agriculteur():
+    rows = list(STORE["leaderboard"].values())
+    rows.sort(key=lambda x: x.get("niveauAgriculteur", 0), reverse=True)
+    return rows[:20]
+
+
+@api_router.get("/leaderboard/tueur")
+async def leaderboard_tueur():
+    rows = list(STORE["leaderboard"].values())
+    rows.sort(key=lambda x: x.get("niveauTueur", 0), reverse=True)
     return rows[:20]
 
 

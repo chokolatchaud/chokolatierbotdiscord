@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { Crown, Medal, Trophy, Coins, Building2, Hammer, Sailboat } from "lucide-react";
+import { Crown, Medal, Trophy, Coins, Hammer, Sailboat, Pickaxe, Wheat, Fish, PiggyBank, Swords } from "lucide-react";
 
 const TABS = [
   { id: "argent",     label: "Argent",     endpoint: "/leaderboard/argent",     icon: Coins,     unit: "$FB",  field: "balance",    nameField: "username",   color: "text-yellow-400" },
-  { id: "structures", label: "Structures", endpoint: "/leaderboard/structures", icon: Building2, unit: "str.", field: "structures", nameField: "username",   color: "text-emerald-400" },
   { id: "blocpose",   label: "Bâtisseurs", endpoint: "/leaderboard/blocpose",   icon: Hammer,    unit: "blocs", field: "blocpose",  nameField: "username",   color: "text-blue-400" },
   { id: "bateaux",    label: "Bateaux",    endpoint: "/boatrace/times",         icon: Sailboat,  unit: "temps", field: "seconds",   nameField: "playerName", color: "text-cyan-400" },
+  { id: "mineur",       label: "Mineur",       endpoint: "/leaderboard/mineur",       icon: Pickaxe,   unit: "niveau", field: "niveauMineur",       nameField: "username", color: "text-zinc-300" },
+  { id: "farmeur",      label: "Farmeur",      endpoint: "/leaderboard/farmeur",      icon: Wheat,     unit: "niveau", field: "niveauFarmeur",      nameField: "username", color: "text-lime-400" },
+  { id: "pecheur",      label: "Pêcheur",      endpoint: "/leaderboard/pecheur",      icon: Fish,      unit: "niveau", field: "niveauPecheur",      nameField: "username", color: "text-sky-400" },
+  { id: "agriculteur",  label: "Agriculteur",  endpoint: "/leaderboard/agriculteur",  icon: PiggyBank, unit: "niveau", field: "niveauAgriculteur",  nameField: "username", color: "text-pink-400" },
+  { id: "tueur",        label: "Tueur",        endpoint: "/leaderboard/tueur",        icon: Swords,    unit: "niveau", field: "niveauTueur",        nameField: "username", color: "text-red-400" },
 ];
 
 function formatVal(val, unit) {
