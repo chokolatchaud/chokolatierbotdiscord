@@ -37,7 +37,8 @@ OFFLINE_AFTER_SECONDS = int(os.environ.get('OFFLINE_AFTER_SECONDS', '120'))
 STORE = {
     "server_state": None,       # {online_players, max_players, version, updated_at}
     "last_push": None,          # datetime du dernier push reçu (n'importe lequel)
-    "structures": {},           # name -> {name, price, change_pct, history[100], ...}
+    "structures": {},           # name -> {name, price, change_pct, history[100], ...} (ANCIEN systeme, garde pour compat frontend)
+    "metiers": {},              # nom_metier -> {metier, coefficient, prix_actuel, history[100], ...} (NOUVEAU systeme)
     "leaderboard": {},          # username -> {username, balance, blocpose, niveauMineur, niveauFarmeur, niveauPecheur, niveauAgriculteur, niveauTueur, updated_at}
     "vote_sites": [],           # [{name, url, reward, order}]
     "boat_times": [],           # [{playerName, seconds}] deja tries du plus rapide au plus lent
@@ -77,6 +78,16 @@ class StructureUpdateIn(BaseModel):
     price: float
     icon: Optional[str] = None
     category: Optional[str] = "Structure"
+
+
+class MetierPrixEntry(BaseModel):
+    metier: str
+    prixActuel: float
+
+
+class MarketMetiersIn(BaseModel):
+    coefficients: dict
+    prix: List[MetierPrixEntry]
 
 
 class LeaderboardEntryIn(BaseModel):
@@ -133,6 +144,13 @@ async def server_status():
 async def list_structures():
     items = list(STORE["structures"].values())
     items.sort(key=lambda x: x.get("name", ""))
+    return items
+
+
+@api_router.get("/market/metiers")
+async def list_metiers():
+    items = list(STORE["metiers"].values())
+    items.sort(key=lambda x: x.get("metier", ""))
     return items
 
 
@@ -244,6 +262,35 @@ async def upsert_structure(data: StructureUpdateIn, x_api_key: Optional[str] = H
     STORE["structures"][data.name] = doc
     touch_push()
     return doc
+
+
+@api_router.post("/market/metiers")
+async def upsert_metiers(data: MarketMetiersIn, x_api_key: Optional[str] = Header(None)):
+    require_plugin_key(x_api_key)
+    now = now_iso()
+
+    for entry in data.prix:
+        nom = entry.metier
+        existing = STORE["metiers"].get(nom)
+        history = existing.get("history", []) if existing else []
+        history = history + [{"t": now, "price": entry.prixActuel}]
+        history = history[-100:]
+        prev = existing.get("prix_actuel") if existing else entry.prixActuel
+        change = ((entry.prixActuel - prev) / prev * 100) if prev else 0
+
+        doc = {
+            "metier": nom,
+            "coefficient": data.coefficients.get(nom.lower()),
+            "prix_actuel": entry.prixActuel,
+            "previous_price": prev,
+            "change_pct": round(change, 2),
+            "history": history,
+            "updated_at": now,
+        }
+        STORE["metiers"][nom] = doc
+
+    touch_push()
+    return {"ok": True, "count": len(data.prix)}
 
 
 @api_router.post("/leaderboard")
