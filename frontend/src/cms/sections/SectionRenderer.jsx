@@ -47,11 +47,18 @@ function Links({ content = {} }) {
   </div></section>;
 }
 
+function ImageSection({ content = {} }) {
+  return <section className="mx-auto max-w-6xl px-6 py-16">
+    {content.src ? <img src={content.src} alt={content.alt || ""} className="w-full max-h-[620px] object-cover rounded-sm border border-border" /> : <div className="h-64 border border-dashed border-border flex items-center justify-center text-zinc-600">Image non configurée</div>}
+    {content.caption && <p className="text-xs text-zinc-500 mt-2">{content.caption}</p>}
+  </section>;
+}
+
 function TextSection({ content = {} }) {
   return <section className="mx-auto max-w-4xl px-6 py-16">{content.title&&<h2 className="font-display font-bold text-3xl mb-4">{content.title}</h2>}<div className="text-zinc-300 leading-relaxed whitespace-pre-wrap">{content.body}</div></section>;
 }
 
-const COMPONENTS={hero:Hero,stats:Stats,cards:Cards,links:Links,text:TextSection};
+const COMPONENTS={hero:Hero,stats:Stats,cards:Cards,links:Links,text:TextSection,image:ImageSection};
 
 export default function SectionRenderer({section,context}) {
   if(!section?.enabled) return null;
